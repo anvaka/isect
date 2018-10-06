@@ -36,7 +36,7 @@ The benchmark code is available here. Higher ops per second value is better!
 
 ### K12 graph
 
-![K12 graph](https://i.imgur.com/PTXwvd3.png)]
+![K12 graph](https://i.imgur.com/PTXwvd3m.png)
 
 * Sweep: x 1,022 ops/sec ±1.94% (90 runs sampled)
 * Brute: x **7,252** ops/sec ±3.15% (78 runs sampled)
@@ -46,7 +46,7 @@ intersections. Brute force algorithm is 7x faster than Sweep Line
 
 ### 100 random lines
 
-![100 random lines](https://i.imgur.com/ytOEsyN.png)
+![100 random lines](https://i.imgur.com/ytOEsyNm.png)
 
 In this demo 100 lines are randomly sampled inside a box with a side of 42px.
 
@@ -59,7 +59,7 @@ perform on a dataset with many lines and very few intersections.
 
 ### Sparse intersections
 
-![sparse](https://i.imgur.com/ZkzZS9s.png)
+![sparse](https://i.imgur.com/ZkzZS9sm.png)
 
 * Sweep: x **135** ops/sec ±0.55% (75 runs sampled)
 * Brute: x 13.5 ops/sec ±0.43% (38 runs sampled)
