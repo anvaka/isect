@@ -109,7 +109,7 @@ function createScene(options, canvas) {
   function runAsync() {
     var start = performance.now();
     // only sweep line supports async running at the moment
-    iSector = isect.sweep(lines, { onError });
+    iSector = isect[algorithmName](lines, { onError });
     var end = performance.now();
     totalElapsed += (end - start);
     updateSearchMetrics(totalElapsed);
@@ -119,8 +119,10 @@ function createScene(options, canvas) {
     // for console driven debugging
     window.next = () => {
       var hasMore = iSector.step();
-      drawSweepStatus(iSector.sweepStatus);
-      iSector.sweepStatus.printStatus();
+      if (iSector.sweepStatus) {
+        drawSweepStatus(iSector.sweepStatus);
+        iSector.sweepStatus.printStatus();
+      }
       drawIntersections(iSector.results)
       return hasMore;
     }
@@ -163,6 +165,8 @@ function createScene(options, canvas) {
   }
 
   function drawSweepStatus(sweepStatus) {
+    if (!sweepStatus) return;
+
     var pt = sweepStatus.getLastPoint();
     if (status.point) {
       scene.removeChild(status.point);

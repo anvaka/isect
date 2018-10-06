@@ -3,7 +3,7 @@
 This library allows you to find all intersections in a given set of
 segments. 
 
-TODO: Image
+[![demo](https://i.imgur.com/XiQ45h7.gif)](https://anvaka.github.io/isect/)
 
 # Methods
 

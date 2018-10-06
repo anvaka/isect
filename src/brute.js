@@ -10,16 +10,42 @@ export default function brute(lines, options) {
   var results = [];
   var reportIntersection = (options && options.onFound) || 
                             defaultIntersectionReporter;
+  var asyncState;
 
   return {
     /**
      * Execute brute force of the segment intersection search
      */
-    run: run,
+    run,
     /**
      * Access to results array. Works only when you use default onFound() handler
      */
-    results: results
+    results,
+
+    /**
+     * Performs a single step in the brute force algorithm ()
+     */
+    step
+  }
+
+  function step() {
+    if (!asyncState) {
+      asyncState = {
+        i: 0
+      }
+    }
+    var test = lines[asyncState.i];
+    for (var j = asyncState.i + 1; j < lines.length; ++j) {
+      var other = lines[j];
+      var pt = intersectSegments(test, other);
+      if (pt) {
+        if (reportIntersection(pt, [test, other])) {
+          return;
+        }
+      }
+    }
+    asyncState.i += 1;
+    return asyncState.i < lines.length;
   }
 
   function run() {
