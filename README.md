@@ -206,6 +206,9 @@ use [decimal.js](https://github.com/MikeMcl/decimal.js-light).
 If you know any - please share. In particular this paper [An optimal algorithm for finding segments intersections](http://club.pdmi.ras.ru/moodle/file.php/15/Materials/p211-balaban.pdf) looks very promising!
 Their runtime is `O(n * log(n) + k)` which should be faster than Bentley-Ottmann.
 
+# License
+
+MIT
 
 # Thanks!
 
