@@ -17,26 +17,16 @@ export default {
   plugins: [
 		node(),
 		cjs(),
-		buble()
+    buble(),
+    uglify()
 	],
   output: [{
       sourcemap: true,
       format: 'umd',
       name: 'isect',
-      file: 'build/isect.js',
-      banner
-    },
-    {
-      sourcemap: true,
-      format: 'umd',
-      name: 'isect',
       file: 'build/isect.min.js',
       banner,
-      plugins: [uglify()]
-    },
-    {
-      format: 'es',
-      file: 'build/isect.module.js'
+      plugins: []
     }
   ],
 }

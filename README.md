@@ -81,6 +81,12 @@ Install the module from npm:
 npm i isect
 ```
 
+Or download from CDN:
+
+<script src='https://cdn.rawgit.com/anvaka/isect/v1.0.0/build/isect.min.js'></script>
+
+If you download from CDN the library will be available under `isect` global name.
+
 ## Basic usage
 
 The code below detects all intersections between segments in the array:

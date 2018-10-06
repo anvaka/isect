@@ -1,7 +1,6 @@
 .DS_Store
 node_modules
 /dist
-/build
 
 /demo/outline/
 /demo/interactive/public/lines.json
