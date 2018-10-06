@@ -36,7 +36,7 @@ common in force-based graph drawing, where "hairball" is formed by a few thousan
 
 [![demo](https://i.imgur.com/SUKRHt4.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
 
-## Performance measurements
+## Performance 
 
 The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second value is better!
 
