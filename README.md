@@ -32,13 +32,13 @@ and thus has O(n*n) performance.
 
 Despite it's naiveté, it works much faster than Bentley-Ottmann algorithm for the cases
 when there are a few thousand lines and millions of intersections. This scenario is
-common in force-based graph drawing, where "hairball" formed by a few thousand lines.
+common in force-based graph drawing, where "hairball" is formed by a few thousand lines.
 
 [![demo](https://i.imgur.com/SUKRHt4.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
 
 ## Performance measurements
 
-The benchmark code is available here. Higher ops per second value is better!
+The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second value is better!
 
 ### K12 graph
 
@@ -109,7 +109,7 @@ console.log(intersections);
 
 ## Brute force
 
-You can also run an example above using a brute force algorithm, simply
+You can also run the above example with a brute force algorithm. Simply
 change `.sweep()` to `.brute()` :
 
 ``` js
@@ -137,7 +137,7 @@ a discrepancies in the API.
 
 If you don't care about all intersections, but want to know if there is
 at least one intersection, you can pass a `onFound()` callback and request
-the library to stop as soon as it finds the intersection:
+the library to stop as soon as it finds an intersection:
 
 ``` js
 var sweepLine = isect.sweep([/* array of segments */], {
@@ -156,13 +156,28 @@ var sweepLine = isect.sweep([/* array of segments */], {
 
 *Note:* `.brute()` also supports early stopping. Unlike `.sweep()` it doesn't de-dupe 
 points. If more than two segments intersect in the same point, the `onFound()` is called
-for each pair, intersecting in the point. Another major difference between `.sweep()` and `.brute()`
-is that `.brute()` never gives `lower` or `upper` arrays - you would have to do check yourself.
+for each pair of intersecting segments. Another major difference between `.sweep()` and `.brute()`
+is that `.brute()` never provides `lower` or `upper` arrays - you would have to do check yourself.
 
 ## Asynchronous workflow
 
-TODO: explain
+If you want to give browser time to catch up with user input, it may be desirable to break the
+algorithm into chunks (so that UI thread is not swamped). You can do this by calling `.step()`
+method of the algorithm's instance:
 
+
+``` js
+var sweepLine = isect.sweep([/* array of segments */]);
+// instead of sweepLine.run(), we do:
+var isDone = sweepLine.step()
+// isDone will be set to true, once the algorithm is completed.
+```
+
+This is precisely how I do step-by-step animation of the algorithm:
+
+[![demo](https://i.imgur.com/dQrGKTt.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=sweep&stepsPerFrame=1)
+
+[Click here](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=sweep&stepsPerFrame=1) to see it in action. 
 
 ## Limitations
 
@@ -173,3 +188,22 @@ cause it to fail.
 While library does detected `point-segment` overlap, it does not detected `point-point`
 overlap. I.e. identical points in the input dataset, that do not overlap any segment
 will not be reported.
+
+# Miscellaneous 
+
+* The source code for the demo is [available here](https://github.com/anvaka/isect/tree/master/demo/interactive).
+* The sweep line algorithm requires a binary search tree. I'm using [w8r/splay-tree](https://github.com/w8r/splay-tree) for this purpose. Love the library a lot!
+I have also tried AVL tree, but found their performance worse than splay tree.
+* The floating point rounding errors were driving me crazy during implementation of
+this library. It is somewhat frustrating, since sweep line algorithm relies on order
+of segments in the tree, which could be broken fairly easy with well-crafted test
+case. If you need a sweep line with higher precision, consider porting this library to
+use [decimal.js](https://github.com/MikeMcl/decimal.js-light).
+* I would absolutely love to have faster intersection algorithms implemented in JavaScript.
+If you know any - please share. In particular this paper [An optimal algorithm for finding segments intersections](http://club.pdmi.ras.ru/moodle/file.php/15/Materials/p211-balaban.pdf) looks very promising!
+
+
+# Thanks!
+
+I hope you enjoy the library. Feel free to ping me (anvaka@gmail.com or https://twitter.com/anvaka) if
+you have any feedback.
