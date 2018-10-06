@@ -83,7 +83,9 @@ npm i isect
 
 Or download from CDN:
 
+``` html
 <script src='https://cdn.rawgit.com/anvaka/isect/v1.0.0/build/isect.min.js'></script>
+```
 
 If you download from CDN the library will be available under `isect` global name.
 
