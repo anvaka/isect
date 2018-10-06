@@ -1,8 +1,11 @@
 var test = require('tap').test;
-var sweep = require('../').sweep;
+var isect = require('../');
+var sweep = isect.sweep;
+var brute = isect.brute;
+
 var rnd = require('../perf/generators').drunkGrid;
 
-test('it can find vertical/horizontal intersections', (t) => {
+test('it can find vertical/horizontal intersections', t => {
   var intersections = sweep([{
     from: {x: -1, y: 0},
     to: {x: 1, y: 0},
@@ -14,6 +17,47 @@ test('it can find vertical/horizontal intersections', (t) => {
   t.equals(intersections.length, 1, 'one intersection found');
   t.equals(intersections[0].point.x, 0)
   t.equals(intersections[0].point.y, 0)
+  t.end();
+});
+
+test('brute force works too', t => {
+  var bruteForce = brute([{
+    from: {x:  0, y:  0},
+    to:   {x: 10, y: 10}
+  }, {
+    from: {x:  0, y: 10},
+    to:   {x: 10, y:  0}
+  }]);
+
+  var intersections = bruteForce.run();
+  t.equals(intersections.length, 1, 'one intersection found');
+  t.equals(intersections[0].point.x, 5)
+  t.equals(intersections[0].point.y, 5)
+  t.end();
+});
+
+test('brute force can stop early', t => {
+  var callCount = 0;
+  var bruteForce = brute([{
+    from: {x:  0, y:  0},
+    to:   {x: 10, y: 10}
+  }, {
+    from: {x:  0, y: 10},
+    to:   {x: 10, y:  0}
+  }, {
+    from: {x: 1, y: 10},
+    to:   {x: 1, y:  0}
+  }], {
+    onFound(pt, intersections) {
+      callCount += 1;
+      t.ok(pt, 'point is reported');
+      t.ok(Array.isArray(intersections), 'point is reported');
+      return true;
+    }
+  });
+
+  bruteForce.run();
+  t.equals(callCount, 1, 'Stopped early');
   t.end();
 })
 

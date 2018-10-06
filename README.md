@@ -32,18 +32,40 @@ common in force-based graph drawing, where "hairball" formed by a few thousand l
 
 ## Performance measurements
 
-The benchmark code is available here.
+The benchmark code is available here. Higher ops per second value is better!
 
-[![K12 graph](https://i.imgur.com/PTXwvd3.png)]()
-```
-Sweep: Circular lines 12x40 x 1,022 ops/sec ±1.94% (90 runs sampled)
-Brute: Circular lines 12x40 x 7,252 ops/sec ±3.15% (78 runs sampled)
-Sweep: 100 Random lines lines in 42px box x 267 ops/sec ±0.80% (89 runs sampled)
-Brute: 100 Random lines lines in 42px box x 3,751 ops/sec ±2.42% (76 runs sampled)
-Sweep: 2,500 sparse lines x 135 ops/sec ±0.55% (75 runs sampled)
-Brute: 2,500 sparse lines x 13.57 ops/sec ±0.43% (38 runs sampled)
-```
+### K12 graph
 
+![K12 graph](https://i.imgur.com/PTXwvd3.png)]
+
+* Sweep: x 1,022 ops/sec ±1.94% (90 runs sampled)
+* Brute: x **7,252** ops/sec ±3.15% (78 runs sampled)
+
+The graph has only `66` unique segments, and `313` unique
+intersections. Brute force algorithm is 7x faster than Sweep Line
+
+### 100 random lines
+
+![100 random lines](https://i.imgur.com/ytOEsyN.png)
+
+In this demo 100 lines are randomly sampled inside a box with a side of 42px.
+
+* Sweep: x 267 ops/sec ±0.80% (89 runs sampled)
+* Brute: x **3,751** ops/sec ±2.42% (76 runs sampled)
+
+Again, brute force algorithm wins by large margin. You might be wondering if there
+even a point to have sweep line implementation? Yes! Let's measure how algorithms
+perform on a dataset with many lines and very few intersections. 
+
+### Sparse intersections
+
+![sparse](https://i.imgur.com/ZkzZS9s.png)
+
+* Sweep: x **135** ops/sec ±0.55% (75 runs sampled)
+* Brute: x 13.5 ops/sec ±0.43% (38 runs sampled)
+
+Now is the time for the sweep line to shine! We have only `~350` intersections and `2,500`
+lines. And sweep line outperforms brute force by a factor of 10.
 
 # usage
 
@@ -62,7 +84,7 @@ The code below detects all intersections between segments in the array:
 var isect = require('isect');
 
 // Prepare the library to detect all intersection
-var iSector = isect([{
+var sweepLine = isect.sweep([{
   from: {x:  0, y:  0},
   to:   {x: 10, y: 10}
 }, {
@@ -71,7 +93,7 @@ var iSector = isect([{
 }]);
 
 // Detect them all, operation is synchronous. 
-var intersections = iSector.run();
+var intersections = sweepLine.run();
 console.log(intersections);
 // Prints:
 // 
@@ -80,6 +102,32 @@ console.log(intersections);
 // array of segments contain both segments.
 ```
 
+## Brute force
+
+You can also run an example above using a brute force algorithm, simply
+change `.sweep()` to `.brute()` :
+
+``` js
+
+var isect = require('isect');
+
+// Prepare the library to detect all intersection
+var bruteForce = isect.brute([{
+  from: {x:  0, y:  0},
+  to:   {x: 10, y: 10}
+}, {
+  from: {x:  0, y: 10},
+  to:   {x: 10, y:  0}
+}]);
+
+var intersections = bruteForce.run();
+console.log(intersections);
+```
+
+Both `.sweep()` and `.brute()` have identical API. In every example below
+you can replace `.sweep()` with `.brute()` - just pay attention to notes that calls out
+a discrepancies in the API.
+
 ## Early stopping
 
 If you don't care about all intersections, but want to know if there is
@@ -87,7 +135,7 @@ at least one intersection, you can pass a `onFound()` callback and request
 the library to stop as soon as it finds the intersection:
 
 ``` js
-var iSector = isect([/* array of segments */], {
+var sweepLine = isect.sweep([/* array of segments */], {
   onFound(point, interior, lower, upper) {
     // `point` is {x, y} of the intersection,
     // `interior`is array of segments that have this point inside
@@ -101,13 +149,17 @@ var iSector = isect([/* array of segments */], {
 });
 ```
 
+*Note:* `.brute()` also supports early stopping. Unlike `.sweep()` it doesn't de-dupe 
+points. If more than two segments intersect in the same point, the `onFound()` is called
+for each pair, intersecting in the point. Another major difference between `.sweep()` and `.brute()`
+is that `.brute()` never gives `lower` or `upper` arrays - you would have to do check yourself.
+
 ## Asynchronous workflow
 
 TODO: explain
 
 
 ## Performance
-
 
 
 ## Limitations
