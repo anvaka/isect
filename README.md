@@ -17,7 +17,7 @@ This algorithm has `O(n*log(n) + k*log(n))` performance, where `n` is number of
 segments, and `k` is number of intersections.
 
 This method is preferred when you have large number of lines, and not too many
-intersections (`k = o(n^2/log(n)`, to be more specific). 
+intersections (`k = o(n^2/log(n))`, to be more specific). 
 
 The algorithm follows "Computation Geometry, Algorithms and Applications" book
 by Mark de Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars. It does support
@@ -30,7 +30,7 @@ degenerate cases, though read limitations to learn more.
 This is "naive" implementation where each segment is compared with all other segments,
 and thus has O(n*n) performance.
 
-Despite it's naiveté, it works much faster than Bentley-Ottmann algorithm for the cases
+Despite its naiveté, it works much faster than Bentley-Ottmann algorithm for the cases
 when there are a few thousand lines and millions of intersections. This scenario is
 common in force-based graph drawing, where "hairball" is formed by a few thousand lines.
 
@@ -38,7 +38,7 @@ common in force-based graph drawing, where "hairball" is formed by a few thousan
 
 ## Performance 
 
-The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second value is better!
+The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second is better!
 
 ### K12 graph
 
