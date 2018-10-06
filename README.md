@@ -5,6 +5,8 @@ segments.
 
 [![demo](https://i.imgur.com/XiQ45h7.gif)](https://anvaka.github.io/isect/)
 
+[Try the demo online](https://anvaka.github.io/isect/)
+
 # Methods
 
 The library implements two methods
@@ -21,6 +23,8 @@ The algorithm follows "Computation Geometry, Algorithms and Applications" book
 by Mark de Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars. It does support
 degenerate cases, though read limitations to learn more.
 
+[![demo](https://i.imgur.com/dQrGKTt.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=sweep&stepsPerFrame=1)
+
 ## Brute force algorithm
 
 This is "naive" implementation where each segment is compared with all other segments,
@@ -30,13 +34,15 @@ Despite it's naiveté, it works much faster than Bentley-Ottmann algorithm for t
 when there are a few thousand lines and millions of intersections. This scenario is
 common in force-based graph drawing, where "hairball" formed by a few thousand lines.
 
+[![demo](https://i.imgur.com/SUKRHt4.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
+
 ## Performance measurements
 
 The benchmark code is available here. Higher ops per second value is better!
 
 ### K12 graph
 
-![K12 graph](https://i.imgur.com/PTXwvd3m.png)
+[![K12 graph](https://i.imgur.com/PTXwvd3m.png)](https://anvaka.github.io/isect/?isAsync=false&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
 
 * Sweep: x 1,022 ops/sec ±1.94% (90 runs sampled)
 * Brute: x **7,252** ops/sec ±3.15% (78 runs sampled)
@@ -46,7 +52,7 @@ intersections. Brute force algorithm is 7x faster than Sweep Line
 
 ### 100 random lines
 
-![100 random lines](https://i.imgur.com/ytOEsyNm.png)
+[![100 random lines](https://i.imgur.com/ytOEsyNm.png)](https://anvaka.github.io/isect/?isAsync=false&p0=100&p1=40&generator=random&algorithm=brute&stepsPerFrame=1)
 
 In this demo 100 lines are randomly sampled inside a box with a side of 42px.
 
@@ -59,7 +65,7 @@ perform on a dataset with many lines and very few intersections.
 
 ### Sparse intersections
 
-![sparse](https://i.imgur.com/ZkzZS9sm.png)
+[![sparse](https://i.imgur.com/ZkzZS9sm.png)](https://anvaka.github.io/isect/?isAsync=false&p0=50&p1=40&generator=sparse&algorithm=sweep&stepsPerFrame=1)
 
 * Sweep: x **135** ops/sec ±0.55% (75 runs sampled)
 * Brute: x 13.5 ops/sec ±0.43% (38 runs sampled)
@@ -69,14 +75,13 @@ lines. And sweep line outperforms brute force by a factor of 10.
 
 # usage
 
-## installation 
 Install the module from npm:
 
 ```
 npm i isect
 ```
 
-## basic usage
+## Basic usage
 
 The code below detects all intersections between segments in the array:
 
@@ -159,15 +164,11 @@ is that `.brute()` never gives `lower` or `upper` arrays - you would have to do 
 TODO: explain
 
 
-## Performance
-
-
 ## Limitations
 
-The library is susceptible to floating point rounding errors. It is
+The sweep line algorithm is susceptible to floating point rounding errors. It is
 possible to construct an example, with nearly horizontal lines, that would
-cause library to fail. TODO: link to drunk grid with small variance and large
-number of lines.
+cause it to fail.
 
 While library does detected `point-segment` overlap, it does not detected `point-point`
 overlap. I.e. identical points in the input dataset, that do not overlap any segment
