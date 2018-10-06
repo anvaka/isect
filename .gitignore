@@ -5,6 +5,7 @@ node_modules
 
 /demo/outline/
 /demo/interactive/public/lines.json
+/demo/interactive/dist
 
 # local env files
 .env.local
