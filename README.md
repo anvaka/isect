@@ -193,9 +193,9 @@ The sweep line algorithm is susceptible to floating point rounding errors. It is
 possible to construct an example, with nearly horizontal lines, that would
 cause it to fail.
 
-While library does detected `point-segment` overlap, it does not detected `point-point`
-overlap. I.e. identical points in the input dataset, that do not overlap any segment
-will not be reported.
+While sweep line implementation detects `point-segment` overlap, I didn't implement `point-point`
+overlap. I.e. identical points in the input array that do not overlap any segment
+are not reported.
 
 # Miscellaneous 
 
