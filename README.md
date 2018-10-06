@@ -1,4 +1,4 @@
-# isect - intersection detection library
+# isect - intersection detection library [![Build Status](https://travis-ci.org/anvaka/isect.svg?branch=master)](https://travis-ci.org/anvaka/isect)
 
 This library allows you to find all intersections in a given set of
 segments. 
