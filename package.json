@@ -1,0 +1,41 @@
+{
+  "name": "isect",
+  "version": "1.0.0",
+  "main": "build/isect.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "scripts": {
+    "pretest": "rollup -c",
+    "test": "tap test/*.js",
+    "start": "rm -rf build && rollup -c",
+    "prepublish": "npm run start"
+  },
+  "dependencies": {
+    "splaytree": "^2.0.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^9.0.0",
+    "benchmark": "^2.1.4",
+    "bentley-ottman-sweepline": "^0.1.4",
+    "eslint": "^5.6.0",
+    "ngraph.random": "^0.1.0",
+    "rollup": "^0.66.1",
+    "rollup-plugin-buble": "^0.19.2",
+    "rollup-plugin-commonjs": "^9.1.8",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "tap": "^12.0.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  }
+}
