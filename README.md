@@ -7,9 +7,9 @@ segments.
 
 [Try the demo online](https://anvaka.github.io/isect/)
 
-# Methods
+# Algorithms
 
-The library implements two methods
+The library implements two algorithms
 
 ## Bentley-Ottmann sweep line algorithm
 
@@ -194,13 +194,11 @@ will not be reported.
 * The source code for the demo is [available here](https://github.com/anvaka/isect/tree/master/demo/interactive).
 * The sweep line algorithm requires a binary search tree. I'm using [w8r/splay-tree](https://github.com/w8r/splay-tree) for this purpose. Love the library a lot!
 I have also tried AVL tree, but found their performance worse than splay tree.
-* The floating point rounding errors were driving me crazy during implementation of
-this library. It is somewhat frustrating, since sweep line algorithm relies on order
-of segments in the tree, which could be broken fairly easy with well-crafted test
-case. If you need a sweep line with higher precision, consider porting this library to
+* If you need a sweep line with higher precision, consider porting this library to
 use [decimal.js](https://github.com/MikeMcl/decimal.js-light).
 * I would absolutely love to have faster intersection algorithms implemented in JavaScript.
 If you know any - please share. In particular this paper [An optimal algorithm for finding segments intersections](http://club.pdmi.ras.ru/moodle/file.php/15/Materials/p211-balaban.pdf) looks very promising!
+Their runtime is `O(n * log(n) + k)` which should be faster than Bentley-Ottmann.
 
 
 # Thanks!

@@ -12,7 +12,7 @@
       <div class='label'>Finding intersections...</div>
     </div>
     <div class='error' v-if='error'>
-      Rounding error detected.
+      Asserting failed in sweep line.
     </div>
     <a href='https://github.com/anvaka/isect' class='info'>Source code</a>
   </div>
