@@ -73,6 +73,9 @@ export default function brute(lines, options) {
 }
 
 function intersectSegments(a, b) {
+  // Note: this is almost the same as geom.intersectSegments()
+  // The main difference is that we don't have a pre-computed
+  // value for dx/dy on the segments.
   //  https://stackoverflow.com/a/1968345/125351
   var aStart = a.from, bStart = b.from;
   var p0_x = aStart.x, p0_y = aStart.y,
