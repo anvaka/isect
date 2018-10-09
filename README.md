@@ -9,7 +9,7 @@ segments.
 
 # Algorithms
 
-The library implements two algorithms
+The library implements three algorithms
 
 ## Bentley-Ottmann sweep line algorithm
 
@@ -36,6 +36,22 @@ common in force-based graph drawing, where "hairball" is formed by a few thousan
 
 [![demo](https://i.imgur.com/SUKRHt4.gif)](https://anvaka.github.io/isect/?isAsync=true&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
 
+## "Bush" algorithm
+
+This algorithm was suggested by [@mourner](https://twitter.com/mourner/status/1049325199617921024) and
+[@dy](https://github.com/anvaka/isect/issues/1). 
+It uses [mourner/flatbush](https://github.com/mourner/flatbush) as a spatial
+index of segments, and then iterates over every segment, checking overlapping bounding boxes.
+
+Intuitively, worst case performance of this algorithm is comparable with brute force. When every segment
+overlaps with every other segment we should expect `O(n^2)` operations. In practice, however, this 
+algorithm beats both `Bentley-Ottman` and `Brute force` approaches.
+
+Its beauty is in its simplicity. It adapts very well to both sparse and dense segments distribution.
+
+You can also find performance test suite below, so you can decide for yourself. I would absolutely go with
+this algorithm as my default choice.
+
 ## Performance 
 
 The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second is better!
@@ -44,11 +60,13 @@ The benchmark code is [available here](https://github.com/anvaka/isect/blob/mast
 
 [![K12 graph](https://i.imgur.com/PTXwvd3m.png)](https://anvaka.github.io/isect/?isAsync=false&p0=12&p1=40&generator=complete&algorithm=brute&stepsPerFrame=1)
 
-* Sweep: x 1,022 ops/sec ±1.94% (90 runs sampled)
-* Brute: x **7,252** ops/sec ±3.15% (78 runs sampled)
+* Sweep: Circular lines 12x40 x 1,069 ops/sec ±1.98% (91 runs sampled)
+* **Brute: Circular lines 12x40 x 7,463 ops/sec ±3.01% (76 runs sampled)**
+* Bush: Circular lines 12x40 x 5,678 ops/sec ±2.20% (80 runs sampled)
 
 The graph has only `66` unique segments, and `313` unique
-intersections. Brute force algorithm is 7x faster than Sweep Line
+intersections. Brute force algorithm is 7x faster than Sweep Line, closely followed by
+
 
 ### 100 random lines
 
@@ -56,22 +74,23 @@ intersections. Brute force algorithm is 7x faster than Sweep Line
 
 In this demo 100 lines are randomly sampled inside a box with a side of 42px.
 
-* Sweep: x 267 ops/sec ±0.80% (89 runs sampled)
-* Brute: x **3,751** ops/sec ±2.42% (76 runs sampled)
+* Sweep: 100 Random lines lines in 42px box x 277 ops/sec ±1.20% (87 runs sampled)
+* **Brute: 100 Random lines lines in 42px box x 3,606 ops/sec ±3.61% (74 runs sampled)**
+* Bush: 100 Random lines in 42px box x 3,314 ops/sec ±2.66% (83 runs sampled)
 
-Again, brute force algorithm wins by large margin. You might be wondering if there
-even a point to have sweep line implementation? Yes! Let's measure how algorithms
-perform on a dataset with many lines and very few intersections. 
+Again, the brute force algorithm wins. The distance between brute force and 
+Bush shortens. Sweep line comes last.
 
 ### Sparse intersections
 
 [![sparse](https://i.imgur.com/ZkzZS9sm.png)](https://anvaka.github.io/isect/?isAsync=false&p0=50&p1=40&generator=sparse&algorithm=sweep&stepsPerFrame=1)
 
-* Sweep: x **135** ops/sec ±0.55% (75 runs sampled)
-* Brute: x 13.5 ops/sec ±0.43% (38 runs sampled)
+* Sweep: 2,500 sparse lines x 156 ops/sec ±0.97% (80 runs sampled)
+* Brute: 2,500 sparse lines x 13.62 ops/sec ±0.91% (38 runs sampled)
+* **Bush: 2,500 sparse lines x 592 ops/sec ±1.05% (93 runs sampled)**
 
-Now is the time for the sweep line to shine! We have only `~350` intersections and `2,500`
-lines. And sweep line outperforms brute force by a factor of 10.
+Now Bush algorithm wins by huge margin. Bentley-Ottman comes second, and brute
+force comes the last.
 
 # usage
 
@@ -97,7 +116,7 @@ The code below detects all intersections between segments in the array:
 var isect = require('isect');
 
 // Prepare the library to detect all intersection
-var sweepLine = isect.sweep([{
+var detectIntersections = isect.bush([{
   from: {x:  0, y:  0},
   to:   {x: 10, y: 10}
 }, {
@@ -106,7 +125,7 @@ var sweepLine = isect.sweep([{
 }]);
 
 // Detect them all, operation is synchronous. 
-var intersections = sweepLine.run();
+var intersections = detectIntersections.run();
 console.log(intersections);
 // Prints:
 // 
@@ -115,10 +134,11 @@ console.log(intersections);
 // array of segments contain both segments.
 ```
 
-## Brute force
+## Brute force and Sweep Line
 
-You can also run the above example with a brute force algorithm. Simply
-change `.sweep()` to `.brute()` :
+You can also run the above example with a different algorithm. Simply
+change `.bush()` to `.sweep()` (to run Bentley-Ottman) or to `.brute()` (to try
+brute force):
 
 ``` js
 
@@ -135,10 +155,22 @@ var bruteForce = isect.brute([{
 
 var intersections = bruteForce.run();
 console.log(intersections);
+
+// do the same with sweep line:
+var sweepLine = isect.sweep([{
+  from: {x:  0, y:  0},
+  to:   {x: 10, y: 10}
+}, {
+  from: {x:  0, y: 10},
+  to:   {x: 10, y:  0}
+}]);
+
+var intersections = sweepLine.run();
+console.log(intersections);
 ```
 
-Both `.sweep()` and `.brute()` have identical API. In every example below
-you can replace `.sweep()` with `.brute()` - just pay attention to notes that calls out
+All algorithms have identical API. In every example below
+you can replace `.bush()` with `.sweeep()` or `.brute()`  - just pay attention to notes that calls out
 a discrepancies in the API.
 
 ## Early stopping
@@ -148,12 +180,10 @@ at least one intersection, you can pass a `onFound()` callback and request
 the library to stop as soon as it finds an intersection:
 
 ``` js
-var sweepLine = isect.sweep([/* array of segments */], {
-  onFound(point, interior, lower, upper) {
+var intersections = isect.bush([/* array of segments */], {
+  onFound(point, segments) {
     // `point` is {x, y} of the intersection,
-    // `interior`is array of segments that have this point inside
-    // `lower` are segments that have point as a lower endpoint (segment.to)
-    // `upper` are segments that have point as an upper endpoint (segment.from)
+    // `segments` are intersecting segments.
 
     // If you return true from this method, no further processing will be done:
 
@@ -161,11 +191,6 @@ var sweepLine = isect.sweep([/* array of segments */], {
   }
 });
 ```
-
-*Note:* `.brute()` also supports early stopping. Unlike `.sweep()` it doesn't de-dupe 
-points. If more than two segments intersect in the same point, the `onFound()` is called
-for each pair of intersecting segments. Another major difference between `.sweep()` and `.brute()`
-is that `.brute()` never provides `lower` or `upper` arrays - you would have to do check yourself.
 
 ## Asynchronous workflow
 
@@ -175,9 +200,9 @@ method of the algorithm's instance:
 
 
 ``` js
-var sweepLine = isect.sweep([/* array of segments */]);
-// instead of sweepLine.run(), we do:
-var isDone = sweepLine.step()
+var detector = isect.bush([/* array of segments */]);
+// instead of detector.run(), we do:
+var isDone = detector.step()
 // isDone will be set to true, once the algorithm is completed.
 ```
 

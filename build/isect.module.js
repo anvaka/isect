@@ -1444,7 +1444,7 @@ function isect(segments, options) {
 
     if (hasIntersection || hasPointIntersection) {
       p.isReported = true;
-      if (reportIntersection(lastPoint, interior, lower, upper)) {
+      if (reportIntersection(lastPoint, union(interior, union(lower, upper)))) {
         return true;
       }
     }
@@ -1523,10 +1523,10 @@ function isect(segments, options) {
     }
   }
 
-  function defaultIntersectionReporter(p, interior, lower, upper) {
+  function defaultIntersectionReporter(p, segments) {
     results.push({
       point: p, 
-      segments: union(union(interior, lower), upper)
+      segments: segments
     });
   }
 
@@ -1572,8 +1572,8 @@ function isect(segments, options) {
         for (var i = 0; i < prevFrom.length; ++i) {
           var s = prevFrom[i];
           if (samePoint(s.to, to)) {
-            reportIntersection(s.from, [], s.from, s.to);
-            reportIntersection(s.to, [], s.from, s.to);
+            reportIntersection(s.from, [s.from, s.to]);
+            reportIntersection(s.to, [s.from, s.to]);
             return;
           }
         }
@@ -1626,6 +1626,31 @@ function byY(a, b) {
   return res;
 }
 
+function intersectSegments$1(a, b) {
+  // Note: this is almost the same as geom.intersectSegments()
+  // The main difference is that we don't have a pre-computed
+  // value for dx/dy on the segments.
+  //  https://stackoverflow.com/a/1968345/125351
+  var aStart = a.from, bStart = b.from;
+  var p0_x = aStart.x, p0_y = aStart.y,
+      p2_x = bStart.x, p2_y = bStart.y;
+
+  var s1_x = a.from.x - a.to.x, s1_y = a.from.y - a.to.y, s2_x = b.from.x - b.to.x, s2_y = b.from.y - b.to.y;
+  var div = s1_x * s2_y - s2_x * s1_y;
+
+  var s = (s1_y * (p0_x - p2_x) - s1_x * (p0_y - p2_y)) / div;
+  if (s < 0 || s > 1) { return; }
+
+  var t = (s2_x * (p2_y - p0_y) + s2_y * (p0_x - p2_x)) / div;
+
+  if (t >= 0 && t <= 1) {
+    return {
+      x: p0_x - (t * s1_x),
+      y: p0_y - (t * s1_y)
+    }
+  }
+}
+
 /**
  * This is a brute force solution with O(n^2) performance.
  * (`n` is number of segments).
@@ -1633,7 +1658,6 @@ function byY(a, b) {
  * Use this when number of lines is low, and number of intersections
  * is high.
  */
-
 function brute(lines, options) {
   var results = [];
   var reportIntersection = (options && options.onFound) || 
@@ -1700,26 +1724,392 @@ function brute(lines, options) {
   }
 }
 
-function intersectSegments$1(a, b) {
-  //  https://stackoverflow.com/a/1968345/125351
-  var aStart = a.from, bStart = b.from;
-  var p0_x = aStart.x, p0_y = aStart.y,
-      p2_x = bStart.x, p2_y = bStart.y;
+var ARRAY_TYPES = [
+    Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
+    Int32Array, Uint32Array, Float32Array, Float64Array
+];
 
-  var s1_x = a.from.x - a.to.x, s1_y = a.from.y - a.to.y, s2_x = b.from.x - b.to.x, s2_y = b.from.y - b.to.y;
-  var div = s1_x * s2_y - s2_x * s1_y;
+var VERSION = 3; // serialized format version
 
-  var s = (s1_y * (p0_x - p2_x) - s1_x * (p0_y - p2_y)) / div;
-  if (s < 0 || s > 1) { return; }
+var Flatbush = function Flatbush(numItems, nodeSize, ArrayType, data) {
+    var this$1 = this;
 
-  var t = (s2_x * (p2_y - p0_y) + s2_y * (p0_x - p2_x)) / div;
+    if (numItems === undefined) { throw new Error('Missing required argument: numItems.'); }
+    if (isNaN(numItems) || numItems <= 0) { throw new Error(("Unpexpected numItems value: " + numItems + ".")); }
 
-  if (t >= 0 && t <= 1) {
-    return {
-      x: p0_x - (t * s1_x),
-      y: p0_y - (t * s1_y)
+    this.numItems = +numItems;
+    this.nodeSize = Math.min(Math.max(+nodeSize || 16, 2), 65535);
+
+    // calculate the total number of nodes in the R-tree to allocate space for
+    // and the index of each tree level (used in search later)
+    var n = numItems;
+    var numNodes = n;
+    this._levelBounds = [n * 4];
+    do {
+        n = Math.ceil(n / this$1.nodeSize);
+        numNodes += n;
+        this$1._levelBounds.push(numNodes * 4);
+    } while (n !== 1);
+
+    this.ArrayType = ArrayType || Float64Array;
+    this.IndexArrayType = numNodes < 16384 ? Uint16Array : Uint32Array;
+
+    var arrayTypeIndex = ARRAY_TYPES.indexOf(this.ArrayType);
+    var nodesByteSize = numNodes * 4 * this.ArrayType.BYTES_PER_ELEMENT;
+
+    if (arrayTypeIndex < 0) {
+        throw new Error(("Unexpected typed array class: " + ArrayType + "."));
     }
+
+    if (data && (data instanceof ArrayBuffer)) {
+        this.data = data;
+        this._boxes = new this.ArrayType(this.data, 8, numNodes * 4);
+        this._indices = new this.IndexArrayType(this.data, 8 + nodesByteSize, numNodes);
+
+        this._pos = numNodes * 4;
+        this.minX = this._boxes[this._pos - 4];
+        this.minY = this._boxes[this._pos - 3];
+        this.maxX = this._boxes[this._pos - 2];
+        this.maxY = this._boxes[this._pos - 1];
+
+    } else {
+        this.data = new ArrayBuffer(8 + nodesByteSize + numNodes * this.IndexArrayType.BYTES_PER_ELEMENT);
+        this._boxes = new this.ArrayType(this.data, 8, numNodes * 4);
+        this._indices = new this.IndexArrayType(this.data, 8 + nodesByteSize, numNodes);
+        this._pos = 0;
+        this.minX = Infinity;
+        this.minY = Infinity;
+        this.maxX = -Infinity;
+        this.maxY = -Infinity;
+
+        new Uint8Array(this.data, 0, 2).set([0xfb, (VERSION << 4) + arrayTypeIndex]);
+        new Uint16Array(this.data, 2, 1)[0] = nodeSize;
+        new Uint32Array(this.data, 4, 1)[0] = numItems;
+    }
+};
+
+Flatbush.from = function from (data) {
+    if (!(data instanceof ArrayBuffer)) {
+        throw new Error('Data must be an instance of ArrayBuffer.');
+    }
+    var ref = new Uint8Array(data, 0, 2);
+        var magic = ref[0];
+        var versionAndType = ref[1];
+    if (magic !== 0xfb) {
+        throw new Error('Data does not appear to be in a Flatbush format.');
+    }
+    if (versionAndType >> 4 !== VERSION) {
+        throw new Error(("Got v" + (versionAndType >> 4) + " data when expected v" + VERSION + "."));
+    }
+    var ref$1 = new Uint16Array(data, 2, 1);
+        var nodeSize = ref$1[0];
+    var ref$2 = new Uint32Array(data, 4, 1);
+        var numItems = ref$2[0];
+
+    return new Flatbush(numItems, nodeSize, ARRAY_TYPES[versionAndType & 0x0f], data);
+};
+
+Flatbush.prototype.add = function add (minX, minY, maxX, maxY) {
+    var index = this._pos >> 2;
+    this._indices[index] = index;
+    this._boxes[this._pos++] = minX;
+    this._boxes[this._pos++] = minY;
+    this._boxes[this._pos++] = maxX;
+    this._boxes[this._pos++] = maxY;
+
+    if (minX < this.minX) { this.minX = minX; }
+    if (minY < this.minY) { this.minY = minY; }
+    if (maxX > this.maxX) { this.maxX = maxX; }
+    if (maxY > this.maxY) { this.maxY = maxY; }
+};
+
+Flatbush.prototype.finish = function finish () {
+        var this$1 = this;
+
+    if (this._pos >> 2 !== this.numItems) {
+        throw new Error(("Added " + (this._pos >> 2) + " items when expected " + (this.numItems) + "."));
+    }
+
+    var width = this.maxX - this.minX;
+    var height = this.maxY - this.minY;
+    var hilbertValues = new Uint32Array(this.numItems);
+    var hilbertMax = (1 << 16) - 1;
+
+    // map item centers into Hilbert coordinate space and calculate Hilbert values
+    for (var i = 0; i < this.numItems; i++) {
+        var pos = 4 * i;
+        var minX = this$1._boxes[pos++];
+        var minY = this$1._boxes[pos++];
+        var maxX = this$1._boxes[pos++];
+        var maxY = this$1._boxes[pos++];
+        var x = Math.floor(hilbertMax * ((minX + maxX) / 2 - this$1.minX) / width);
+        var y = Math.floor(hilbertMax * ((minY + maxY) / 2 - this$1.minY) / height);
+        hilbertValues[i] = hilbert(x, y);
+    }
+
+    // sort items by their Hilbert value (for packing later)
+    sort$1(hilbertValues, this._boxes, this._indices, 0, this.numItems - 1);
+
+    // generate nodes at each tree level, bottom-up
+    for (var i$1 = 0, pos$1 = 0; i$1 < this._levelBounds.length - 1; i$1++) {
+        var end = this$1._levelBounds[i$1];
+
+        // generate a parent node for each block of consecutive <nodeSize> nodes
+        while (pos$1 < end) {
+            var nodeMinX = Infinity;
+            var nodeMinY = Infinity;
+            var nodeMaxX = -Infinity;
+            var nodeMaxY = -Infinity;
+            var nodeIndex = pos$1;
+
+            // calculate bbox for the new node
+            for (var i$2 = 0; i$2 < this.nodeSize && pos$1 < end; i$2++) {
+                var minX$1 = this$1._boxes[pos$1++];
+                var minY$1 = this$1._boxes[pos$1++];
+                var maxX$1 = this$1._boxes[pos$1++];
+                var maxY$1 = this$1._boxes[pos$1++];
+                if (minX$1 < nodeMinX) { nodeMinX = minX$1; }
+                if (minY$1 < nodeMinY) { nodeMinY = minY$1; }
+                if (maxX$1 > nodeMaxX) { nodeMaxX = maxX$1; }
+                if (maxY$1 > nodeMaxY) { nodeMaxY = maxY$1; }
+            }
+
+            // add the new node to the tree data
+            this$1._indices[this$1._pos >> 2] = nodeIndex;
+            this$1._boxes[this$1._pos++] = nodeMinX;
+            this$1._boxes[this$1._pos++] = nodeMinY;
+            this$1._boxes[this$1._pos++] = nodeMaxX;
+            this$1._boxes[this$1._pos++] = nodeMaxY;
+        }
+    }
+};
+
+Flatbush.prototype.search = function search (minX, minY, maxX, maxY, filterFn) {
+        var this$1 = this;
+
+    if (this._pos !== this._boxes.length) {
+        throw new Error('Data not yet indexed - call index.finish().');
+    }
+
+    var nodeIndex = this._boxes.length - 4;
+    var level = this._levelBounds.length - 1;
+    var queue = [];
+    var results = [];
+
+    while (nodeIndex !== undefined) {
+        // find the end index of the node
+        var end = Math.min(nodeIndex + this$1.nodeSize * 4, this$1._levelBounds[level]);
+
+        // search through child nodes
+        for (var pos = nodeIndex; pos < end; pos += 4) {
+            var index = this$1._indices[pos >> 2];
+
+            // check if node bbox intersects with query bbox
+            if (maxX < this$1._boxes[pos]) { continue; } // maxX < nodeMinX
+            if (maxY < this$1._boxes[pos + 1]) { continue; } // maxY < nodeMinY
+            if (minX > this$1._boxes[pos + 2]) { continue; } // minX > nodeMaxX
+            if (minY > this$1._boxes[pos + 3]) { continue; } // minY > nodeMaxY
+
+            if (nodeIndex < this$1.numItems * 4) {
+                if (filterFn === undefined || filterFn(index)) {
+                    results.push(index); // leaf item
+                }
+
+            } else {
+                queue.push(index); // node; add it to the search queue
+                queue.push(level - 1);
+            }
+        }
+
+        level = queue.pop();
+        nodeIndex = queue.pop();
+    }
+
+    return results;
+};
+
+// custom quicksort that sorts bbox data alongside the hilbert values
+function sort$1(values, boxes, indices, left, right) {
+    if (left >= right) { return; }
+
+    var pivot = values[(left + right) >> 1];
+    var i = left - 1;
+    var j = right + 1;
+
+    while (true) {
+        do { i++; } while (values[i] < pivot);
+        do { j--; } while (values[j] > pivot);
+        if (i >= j) { break; }
+        swap(values, boxes, indices, i, j);
+    }
+
+    sort$1(values, boxes, indices, left, j);
+    sort$1(values, boxes, indices, j + 1, right);
+}
+
+// swap two values and two corresponding boxes
+function swap(values, boxes, indices, i, j) {
+    var temp = values[i];
+    values[i] = values[j];
+    values[j] = temp;
+
+    var k = 4 * i;
+    var m = 4 * j;
+
+    var a = boxes[k];
+    var b = boxes[k + 1];
+    var c = boxes[k + 2];
+    var d = boxes[k + 3];
+    boxes[k] = boxes[m];
+    boxes[k + 1] = boxes[m + 1];
+    boxes[k + 2] = boxes[m + 2];
+    boxes[k + 3] = boxes[m + 3];
+    boxes[m] = a;
+    boxes[m + 1] = b;
+    boxes[m + 2] = c;
+    boxes[m + 3] = d;
+
+    var e = indices[i];
+    indices[i] = indices[j];
+    indices[j] = e;
+}
+
+// Fast Hilbert curve algorithm by http://threadlocalmutex.com/
+// Ported from C++ https://github.com/rawrunprotected/hilbert_curves (public domain)
+function hilbert(x, y) {
+    var a = x ^ y;
+    var b = 0xFFFF ^ a;
+    var c = 0xFFFF ^ (x | y);
+    var d = x & (y ^ 0xFFFF);
+
+    var A = a | (b >> 1);
+    var B = (a >> 1) ^ a;
+    var C = ((c >> 1) ^ (b & (d >> 1))) ^ c;
+    var D = ((a & (c >> 1)) ^ (d >> 1)) ^ d;
+
+    a = A; b = B; c = C; d = D;
+    A = ((a & (a >> 2)) ^ (b & (b >> 2)));
+    B = ((a & (b >> 2)) ^ (b & ((a ^ b) >> 2)));
+    C ^= ((a & (c >> 2)) ^ (b & (d >> 2)));
+    D ^= ((b & (c >> 2)) ^ ((a ^ b) & (d >> 2)));
+
+    a = A; b = B; c = C; d = D;
+    A = ((a & (a >> 4)) ^ (b & (b >> 4)));
+    B = ((a & (b >> 4)) ^ (b & ((a ^ b) >> 4)));
+    C ^= ((a & (c >> 4)) ^ (b & (d >> 4)));
+    D ^= ((b & (c >> 4)) ^ ((a ^ b) & (d >> 4)));
+
+    a = A; b = B; c = C; d = D;
+    C ^= ((a & (c >> 8)) ^ (b & (d >> 8)));
+    D ^= ((b & (c >> 8)) ^ ((a ^ b) & (d >> 8)));
+
+    a = C ^ (C >> 1);
+    b = D ^ (D >> 1);
+
+    var i0 = x ^ y;
+    var i1 = b | (0xFFFF ^ (i0 | a));
+
+    i0 = (i0 | (i0 << 8)) & 0x00FF00FF;
+    i0 = (i0 | (i0 << 4)) & 0x0F0F0F0F;
+    i0 = (i0 | (i0 << 2)) & 0x33333333;
+    i0 = (i0 | (i0 << 1)) & 0x55555555;
+
+    i1 = (i1 | (i1 << 8)) & 0x00FF00FF;
+    i1 = (i1 | (i1 << 4)) & 0x0F0F0F0F;
+    i1 = (i1 | (i1 << 2)) & 0x33333333;
+    i1 = (i1 | (i1 << 1)) & 0x55555555;
+
+    return ((i1 << 1) | i0) >>> 0;
+}
+
+/**
+ * This implementation is inspired by discussion here 
+ * https://twitter.com/mourner/status/1049325199617921024 and 
+ * here https://github.com/anvaka/isect/issues/1
+ * 
+ * It builds an index of all segments using static spatial index
+ * and then for each segment it queries overlapping rectangles.
+ */
+function bush(lines, options) {
+  var results = [];
+  var reportIntersection = (options && options.onFound) || 
+                            defaultIntersectionReporter;
+  var asyncState;
+
+  var index = new Flatbush(lines.length);
+  lines.forEach(addToIndex);
+  index.finish();
+
+  return {
+    run: run,
+    step: step,
+    results: results,
+
+    // undocumented, don't use unless you know what you are doing:
+    checkIntersection: checkIntersection
+  }
+
+  function run() {
+    for (var i = 0; i < lines.length; ++i) {
+      if (checkIntersection(lines[i], i)) {
+        return; // stop early
+      }
+    }
+    return results;
+  }
+
+  function checkIntersection(currentSegment, currentId) {
+    // sorry about code duplication.
+    var minX = currentSegment.from.x; var maxX = currentSegment.to.x;
+    var minY = currentSegment.from.y; var maxY = currentSegment.to.y;
+    var t;
+    if (minX > maxX) { t = minX; minX = maxX; maxX = t; }
+    if (minY > maxY) { t = minY; minY = maxY; maxY = t; }
+
+    var ids = index.search(minX, minY, maxX, maxY);
+
+    for (var i = 0; i < ids.length; ++i) {
+      var segmentIndex = ids[i];
+      if (segmentIndex <= currentId) { continue; } // we have either reported it, or it is current.
+
+      var otherSegment = lines[segmentIndex];
+      var point = intersectSegments$1(otherSegment, currentSegment);
+
+      if (point) {
+        if (reportIntersection(point, [currentSegment, otherSegment])) {
+          // stop early
+          return true;
+        }
+      }
+    }
+  }
+
+  function step() {
+    if (!asyncState) {
+      asyncState = {i: 0};
+    }
+    var test = lines[asyncState.i];
+    checkIntersection(test, asyncState.i);
+    asyncState.i += 1;
+    return asyncState.i < lines.length;
+  }
+
+
+  function addToIndex(line) {
+    var minX = line.from.x; var maxX = line.to.x;
+    var minY = line.from.y; var maxY = line.to.y;
+    var t;
+    if (minX > maxX) { t = minX; minX = maxX; maxX = t; }
+    if (minY > maxY) { t = minY; minY = maxY; maxY = t; }
+    index.add(minX, minY, maxX, maxY);
+  }
+
+  function defaultIntersectionReporter(p, interior) {
+    results.push({
+      point: p, 
+      segments: interior
+    });
   }
 }
 
-export { isect as sweep, brute };
+export { isect as sweep, brute, bush };

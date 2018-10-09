@@ -6,6 +6,7 @@ var prng = createRandom(seed);
 export * from './brownian';
 
 export function random(count = 4, range = 100, seed) {
+  seed = 1536687392180
   if (seed !== undefined) {
     prng = createRandom(seed);
   }

@@ -4,7 +4,7 @@ var prng = createRandom(42);
 var params = [
   {
     name: 'random',
-    algorithm: 'brute',
+    algorithm: ['brute', 'bush'],
     args: [
       {min: 100, max: 500},  // number of lines
       {min: 100, max: 200},  // visible area
@@ -12,7 +12,7 @@ var params = [
   },
   {
     name: 'complete',
-    algorithm: 'brute',
+    algorithm: ['brute', 'bush'],
     args: [
       {min: 10, max: 40},  // number of nodes
       function p1(qs) {
@@ -23,7 +23,7 @@ var params = [
   },
   {
     name: 'cube',
-    algorithm: 'brute',
+    algorithm: ['brute', 'bush'],
     args: [
       {min: 100, max: 150},  // number of rects
       function p2() {
@@ -33,7 +33,7 @@ var params = [
   },
   {
     name: 'drunkgrid',
-    algorithm: 'brute',
+    algorithm: ['brute', 'bush'],
     args: [
       {min: 10, max: 150},  // Row x Col
       function p2(qs) {
@@ -46,7 +46,7 @@ var params = [
   },
   {
     name: 'sparse',
-    algorithm: 'sweep', 
+    algorithm: ['bush', 'bush', 'sweep'],
     args: [
       {min: 50, max: 300},  // Count  
     ]
@@ -55,7 +55,7 @@ var params = [
     name: 'triangle',
     algorithm(qs) {
       // sparse is better with sweep
-      return (qs.p1 > 7) ? 'brute' : 'sweep'
+      return (qs.p1 > 7) ? 'brute' : 'bush'
     },
     args: [
       {min: 10, max: 30},  // Count  
@@ -64,7 +64,7 @@ var params = [
   },
   {
     name: 'splash',
-    algorithm: 'sweep', 
+    algorithm: ['sweep', 'bush'],
     args: [
       {min: 10, max: 50},  // Number of lines  
       {min: 40, max: 70},  // squared variance  
@@ -72,12 +72,11 @@ var params = [
   },
   {
     name: 'island',
-    algorithm: 'sweep', 
+    algorithm: ['sweep', 'bush'],
     args: [
       {min: 3, max: 10},  // Number of control points on circle
       {min: 6, max: 11},  // Number of subdivisions
     ]
-
   }
 ]
 
@@ -97,7 +96,10 @@ export default function generateRandomExample() {
     }
   });
   var algorithm = 'sweep';
-  if (typeof generator.algorithm === 'function') {
+  if (Array.isArray(generator.algorithm)) {
+    var randomIndex = Math.round(Math.random() * (generator.algorithm.length - 1));
+    algorithm = generator.algorithm[randomIndex];
+  } else if (typeof generator.algorithm === 'function') {
     algorithm = generator.algorithm(qs);
   } else if (typeof generator.algorithm === 'string') {
     algorithm = generator.algorithm;

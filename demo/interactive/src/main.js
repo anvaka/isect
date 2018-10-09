@@ -7,6 +7,8 @@ import queryState from 'query-state';
 
 import bus from './bus';
 
+var whitelistedAlgorithms = new Set(['brute', 'bush', 'sweep']);
+
 var qs = queryState({
   isAsync: false,
   p0: 150,
@@ -48,7 +50,6 @@ function updateScene(appState) {
   currentScene = createScene(sceneOptions, document.getElementById('scene'));
 }
 
-
 function getSceneOptions(state) {
   var generator = state.generator;
   if (!(generator in gen)) {
@@ -65,7 +66,7 @@ function getSceneOptions(state) {
     lines, 
     isAsync, 
     stepsPerFrame,
-    algorithm: state.algorithm === 'brute' ? 'brute' : 'sweep'
+    algorithm: whitelistedAlgorithms.has(state.algorithm) ? state.algorithm : 'bush'
   }
 }
 

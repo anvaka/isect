@@ -148,7 +148,7 @@ export default function isect(segments, options) {
 
     if (hasIntersection || hasPointIntersection) {
       p.isReported = true;
-      if (reportIntersection(lastPoint, interior, lower, upper)) {
+      if (reportIntersection(lastPoint, union(interior, union(lower, upper)))) {
         return true;
       }
     }
@@ -227,10 +227,10 @@ export default function isect(segments, options) {
     }
   }
 
-  function defaultIntersectionReporter(p, interior, lower, upper) {
+  function defaultIntersectionReporter(p, segments) {
     results.push({
       point: p, 
-      segments: union(union(interior, lower), upper)
+      segments: segments
     });
   }
 
@@ -276,8 +276,8 @@ export default function isect(segments, options) {
         for (var i = 0; i < prevFrom.length; ++i) {
           var s = prevFrom[i];
           if (samePoint(s.to, to)) {
-            reportIntersection(s.from, [], s.from, s.to);
-            reportIntersection(s.to, [], s.from, s.to);
+            reportIntersection(s.from, [s.from, s.to]);
+            reportIntersection(s.to, [s.from, s.to]);
             return;
           }
         }
