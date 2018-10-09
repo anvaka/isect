@@ -1,5 +1,5 @@
 /*!
- * isect v1.0.0
+ * isect v2.0.0
  * (c) 2018 Andrei Kashcha.
  * Released under the MIT License.
  */
