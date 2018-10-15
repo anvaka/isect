@@ -1,5 +1,5 @@
 import Flatbush from 'flatbush';
-import intersectSegments from './intersectSegments';
+import intersectSegments from './src/intersectSegments';
 
 /**
  * This implementation is inspired by discussion here 

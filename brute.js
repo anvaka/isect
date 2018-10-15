@@ -1,4 +1,4 @@
-import intersectSegments from './intersectSegments';
+import intersectSegments from './src/intersectSegments';
 
 /**
  * This is a brute force solution with O(n^2) performance.

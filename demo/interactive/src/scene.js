@@ -3,7 +3,7 @@ import appStatus from './appStatus';
 
 export default createScene;
 
-let isect = require('../../../');
+let isect = require('../../../index.js');
 let wgl = require('w-gl');
 
 function createScene(options, canvas) {

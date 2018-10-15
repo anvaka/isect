@@ -1,8 +1,8 @@
-import createEventQueue from './createEventQueue';
-import createSweepStatus from './sweepStatus';
-import SweepEvent from './SweepEvent';
+import createEventQueue from './src/createEventQueue';
+import createSweepStatus from './src/sweepStatus';
+import SweepEvent from './src/SweepEvent';
 
-import {intersectSegments, EPS, angle, samePoint} from './geom';
+import {intersectSegments, EPS, angle, samePoint} from './src/geom';
 
 /**
  * A point on a line

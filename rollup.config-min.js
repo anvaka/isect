@@ -13,7 +13,7 @@ const banner =
   ' * Released under the MIT License.\n' +
   ' */'
 export default {
-  input: 'src/index.js',
+  input: 'index.js',
   plugins: [
 		node(),
 		cjs(),
