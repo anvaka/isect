@@ -20,6 +20,18 @@ export function random(count = 4, range = 100, seed) {
   return lines;
 }
 
+export function parallelSlanted(count) {
+  var lines = [];
+  for (var i = 0; i < count; ++i) {
+    var x = -i, y = i;
+    lines.push({
+      from: {x, y},
+      to: {x: i, y: i + i}
+    })
+  }
+  return lines;
+}
+
 export function sparse(size = 50) {
   var lines = [];
   var rows = size, columns = size;

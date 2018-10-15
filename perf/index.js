@@ -20,6 +20,10 @@ var sparseLines = g.sparse(50, seed);
 var bruteSparseLines = g.sparse(50, seed);
 var bushSparseLines = g.sparse(50, seed);
 
+var slanted = g.parallelSlanted(1000);
+var bruteSlanted = g.parallelSlanted(1000);
+var bushSlanted = g.parallelSlanted(1000);
+
 var aLines = lines.map(x => [[x.from.x, x.from.y], [x.to.x, x.to.y]]);
 var aRandomLines = randomLines.map(x => [[x.from.x, x.from.y], [x.to.x, x.to.y]]);
 
@@ -69,7 +73,18 @@ suite.add('Sweep: Circular lines 12x40', function() {
   var res = bush(bushSparseLines).run();
   if (res.length !== 358) throw new Error('Invalid number of intersections');
 })
-
+.add('Sweep: 1,000 slanted, not intersect', function() {
+  var res = sweep(slanted).run();
+  if (res.length !== 0) throw new Error('Invalid number of intersections');
+})
+.add('Brute: 1,000 slanted, not intersect', function() {
+  var res = brute(bruteSlanted).run();
+  if (res.length !== 0) throw new Error('Invalid number of intersections');
+})
+.add('Bush: 1,000 slanted, not intersect', function() {
+  var res = brute(bushSlanted).run();
+  if (res.length !== 0) throw new Error('Invalid number of intersections');
+})
 // .add('Alternative circular lines 12x40', function () {
 //   var res = alternativeImplementation(aRandomLines);
 //   if (res.length !== 1123) throw new Error('Invalid number of intersections');

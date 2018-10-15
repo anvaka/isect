@@ -14,7 +14,8 @@ module.exports = {
   grid: grid,
   complete: complete,
   drunkGrid: drunkGrid,
-  sparse: sparse
+  sparse: sparse,
+  parallelSlanted: parallelSlanted
 }
 
 function sparse(size, seed) {
@@ -36,6 +37,19 @@ function sparse(size, seed) {
   }
   return lines;
 }
+
+function parallelSlanted(count) {
+  var lines = [];
+  for (var i = 0; i < count; ++i) {
+    var x = -i, y = i;
+    lines.push({
+      from: {x, y},
+      to: {x: i, y: i + i}
+    })
+  }
+  return lines;
+}
+
 
 function random(count = 4, range = 100, seed) {
   if (seed !== undefined) {

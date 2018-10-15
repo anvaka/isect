@@ -92,6 +92,17 @@ Bush shortens. Sweep line comes last.
 Now Bush algorithm wins by huge margin. Bentley-Ottman comes second, and brute
 force comes the last.
 
+### Parallel Slanted lines
+
+[![slanted](https://i.imgur.com/vYAZzNvm.png)](https://anvaka.github.io/isect/?isAsync=false&p0=1000&p1=40&generator=parallelSlanted&algorithm=sweep&stepsPerFrame=1)
+
+* **Sweep: 1000 slanted, not intersect x 622 ops/sec ±1.23% (91 runs sampled)**
+* Brute: 1000 slanted, not intersect x 230 ops/sec ±2.37% (87 runs sampled)
+* Bush: 1000 slanted, not intersect x 243 ops/sec ±1.07% (87 runs sampled)
+
+In this example there too many lines, and none of them intersect. Furthermore, most of the
+rectangular bounding boxes do intersect, which gives more work for the `bush` algorithm
+
 # usage
 
 Install the module from npm:
