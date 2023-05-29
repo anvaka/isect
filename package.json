@@ -1,6 +1,6 @@
 {
   "name": "isect",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "build/isect.js",
   "module": "./index.js",
   "types": "./index.d.ts",
