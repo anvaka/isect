@@ -2,7 +2,7 @@
   "name": "isect",
   "version": "3.0.1",
   "main": "build/isect.js",
-  "module": "./index.js",
+  "module": "build/isect.module.js",
   "types": "./index.d.ts",
   "scripts": {
     "pretest": "rollup -c",
