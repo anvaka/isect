@@ -16,4 +16,6 @@ export type ISectResults = {
 export type ISectOptions = {
 }
 
-export default function isect(segments: Array<Segment>, options: ISectOptions) : ISectResults;
+export function bush(segments: Array<Segment>, options: ISectOptions) : ISectResults;
+export function sweep(segments: Array<Segment>, options: ISectOptions) : ISectResults;
+export function brute(segments: Array<Segment>, options: ISectOptions) : ISectResults;
