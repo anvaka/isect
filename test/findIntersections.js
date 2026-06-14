@@ -15,9 +15,9 @@ test('it can find vertical/horizontal intersections', t => {
     to: {x: 0, y: 1},
   }]).run();
 
-  t.equals(intersections.length, 1, 'one intersection found');
-  t.equals(intersections[0].point.x, 0)
-  t.equals(intersections[0].point.y, 0)
+  t.equal(intersections.length, 1, 'one intersection found');
+  t.equal(intersections[0].point.x, 0)
+  t.equal(intersections[0].point.y, 0)
   t.end();
 });
 
@@ -31,9 +31,9 @@ test('brute force works too', t => {
   }]);
 
   var intersections = bruteForce.run();
-  t.equals(intersections.length, 1, 'one intersection found');
-  t.equals(intersections[0].point.x, 5)
-  t.equals(intersections[0].point.y, 5)
+  t.equal(intersections.length, 1, 'one intersection found');
+  t.equal(intersections[0].point.x, 5)
+  t.equal(intersections[0].point.y, 5)
   t.end();
 });
 
@@ -47,9 +47,9 @@ test('bush works too', t => {
   }]);
 
   var intersections = bushAlgorithm.run();
-  t.equals(intersections.length, 1, 'one intersection found');
-  t.equals(intersections[0].point.x, 5)
-  t.equals(intersections[0].point.y, 5)
+  t.equal(intersections.length, 1, 'one intersection found');
+  t.equal(intersections[0].point.x, 5)
+  t.equal(intersections[0].point.y, 5)
   t.end();
 });
 
@@ -74,7 +74,7 @@ test('brute force can stop early', t => {
   });
 
   bruteForce.run();
-  t.equals(callCount, 1, 'Stopped early');
+  t.equal(callCount, 1, 'Stopped early');
   t.end();
 });
 
@@ -99,7 +99,7 @@ test('bush can stop early', t => {
   });
 
   bushAlgorithm.run();
-  t.equals(callCount, 1, 'Stopped early');
+  t.equal(callCount, 1, 'Stopped early');
   t.end();
 })
 
@@ -117,8 +117,8 @@ test('it reports intersections', t => {
     }
   }).run();
 
-  t.equals(reportedPoint.x, 0, 'x is ok');
-  t.equals(reportedPoint.y, 0, 'y is ok');
+  t.equal(reportedPoint.x, 0, 'x is ok');
+  t.equal(reportedPoint.y, 0, 'y is ok');
   t.end();
 });
 
@@ -131,9 +131,9 @@ test('it can find adjacent points', (t) => {
     to: {x: 2, y: 2},
   }]).run();
 
-  t.equals(intersections.length, 1, 'one intersection found');
-  t.equals(intersections[0].point.x, 1)
-  t.equals(intersections[0].point.y, 0)
+  t.equal(intersections.length, 1, 'one intersection found');
+  t.equal(intersections[0].point.x, 1)
+  t.equal(intersections[0].point.y, 0)
   t.end();
 });
 
@@ -149,10 +149,10 @@ test('it can find all segments', t => {
     to: {x: 0.5, y: 1},
   }]).run();
 
-  t.equals(intersections.length, 1, 'one intersection found');
-  t.equals(intersections[0].point.x, 0.5)
-  t.equals(intersections[0].point.y, 0.5)
-  t.equals(intersections[0].segments.length, 3, 'all three segments found')
+  t.equal(intersections.length, 1, 'one intersection found');
+  t.equal(intersections[0].point.x, 0.5)
+  t.equal(intersections[0].point.y, 0.5)
+  t.equal(intersections[0].segments.length, 3, 'all three segments found')
   t.end();
 });
 
@@ -175,7 +175,7 @@ test('it can early stop', t => {
     }
   }).run();
 
-  t.equals(results.length, 1, 'only one intersection reported');
+  t.equal(results.length, 1, 'only one intersection reported');
   t.end();
 })
 
@@ -186,7 +186,7 @@ test('it can find intersections in cube', t => {
     {from: {x: 1, y: 1}, to: {x: 1, y: -1}},
     {from: {x: 1, y: -1}, to: {x: -1, y: -1}}
   ]).run();
-  t.equals(intersections.length, 4, 'four intersections found');
+  t.equal(intersections.length, 4, 'four intersections found');
   t.end();
 });
 
@@ -198,7 +198,7 @@ test('it does not ignore endpoint if it is internal', t => {
     from: {x: 1, y: 1},
     to: {x: 1, y: -1},
   }]).run();
-  t.equals(intersections.length, 1, 'intersections found');
+  t.equal(intersections.length, 1, 'intersections found');
   t.end();
 });
 
@@ -211,7 +211,7 @@ test('it rounds very close horizontal lines', t => {
       {from: {x: -0.1504860669374466, y: -0.07342482730746269}, to: {x: 0.28500136360526085, y: -0.3957986496388912 }}
     ];
   var intersection = sweep(lines).run();
-  t.equals(intersection.length, 1, 'intersection found');
+  t.equal(intersection.length, 1, 'intersection found');
   t.end();
 });
 
@@ -224,7 +224,7 @@ test('it finds intersection when one segment ends on another', t => {
     {from: {x: 1.1742585226893425, y: 0.6070638746023178}, to: {x: 0.3658513203263283, y: -0.38512956351041794}}
   ]
   var intersection = sweep(lines).run();
-  t.equals(intersection.length, 5, 'intersection found');
+  t.equal(intersection.length, 5, 'intersection found');
   t.end();
 });
 
@@ -237,7 +237,7 @@ test('it finds collinear lines', (t) => {
     to: {x: 2, y: 2},
   }]).run();
 
-  t.equals(intersections.length, 2, 'two intersections found');
+  t.equal(intersections.length, 2, 'two intersections found');
   t.end();
 });
 
@@ -253,7 +253,7 @@ test('it finds overlapping horizontal segments', (t) => {
     to: {x: 12, y: 0},
   }]).run();
 
-  t.equals(intersections.length, 4, 'four intersections found');
+  t.equal(intersections.length, 4, 'four intersections found');
   t.end();
 });
 
@@ -264,7 +264,7 @@ test('finds overlapping triangles', (t) => {
     {from: {x: 2, y: 0}, to: {x:  7, y: -10 }, name: 'D2,0'}
   ]).run();
 
-  t.equals(intersections.length, 3, 'three intersections found');
+  t.equal(intersections.length, 3, 'three intersections found');
   t.end();
 });
 
@@ -273,7 +273,7 @@ test('finds a point', (t) => {
     {from: {x: 0, y: 0}, to: {x: 10, y: 10 }, name: 'segment'},
     {from: {x: 5, y: 5}, to: {x: 5, y: 5 }, name: 'point'}
   ]).run();
-  t.equals(intersections.length, 1, 'it finds the point');
+  t.equal(intersections.length, 1, 'it finds the point');
   t.end();
 });
 
@@ -285,7 +285,7 @@ test('it finds intersections when degenerative point segments are present', t =>
     { from: { x: 2, y: 2 }, to: { x: 4, y: -3}, name: 'just a neighbor'}
   ]).run();
 
-  t.equals(intersections.length, 1, 'it finds the intersection');
+  t.equal(intersections.length, 1, 'it finds the intersection');
   t.end();
 });
 
@@ -321,7 +321,7 @@ test('it finds intersections when degenerative point segments are present', t =>
 //   }))
 
 //   var scaledAnswer = sweep(scaled).run();
-//   t.equals(scaledAnswer.length, 3, 'three intersections found');
+//   t.equal(scaledAnswer.length, 3, 'three intersections found');
 //   t.end();
 // })
 

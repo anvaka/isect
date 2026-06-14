@@ -1,10 +1,9 @@
 import BBox from './BBox';
 import appStatus from './appStatus';
+import * as isect from '../../../index.js';
+import * as wgl from 'w-gl';
 
 export default createScene;
-
-let isect = require('../../../index.js');
-let wgl = require('w-gl');
 
 function createScene(options, canvas) {
   var lines = options.lines;

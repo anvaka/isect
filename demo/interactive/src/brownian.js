@@ -1,4 +1,4 @@
-var createRandom = require('ngraph.random');
+import createRandom from 'ngraph.random';
 var seed = +new Date();
 var prng = createRandom(seed);
 

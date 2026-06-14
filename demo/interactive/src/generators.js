@@ -1,5 +1,5 @@
 /** TODO: How do I remove duplicates from here and perf? */
-var createRandom = require('ngraph.random');
+import createRandom from 'ngraph.random';
 var seed = +new Date();
 var prng = createRandom(seed);
 

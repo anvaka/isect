@@ -1,10 +1,9 @@
-const buble = require('rollup-plugin-buble');
-const cjs = require('rollup-plugin-commonjs');
-const node = require('rollup-plugin-node-resolve');
+import { nodeResolve as node } from '@rollup/plugin-node-resolve';
+import cjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
+import pkg from './package.json' with { type: 'json' };
 
-const uglify = require('rollup-plugin-uglify').uglify;
-
-const version = process.env.VERSION || require('./package.json').version
+const version = process.env.VERSION || pkg.version
 
 const banner =
   '/*!\n' +
@@ -17,8 +16,7 @@ export default {
   plugins: [
 		node(),
 		cjs(),
-    buble(),
-    uglify()
+    terser()
 	],
   output: [{
       sourcemap: true,
