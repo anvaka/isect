@@ -54,7 +54,7 @@ this algorithm as my default choice.
 
 ## Performance 
 
-The benchmark code is [available here](https://github.com/anvaka/isect/blob/master/perf/index.js). Higher ops per second is better!
+The benchmark code is [available here](https://github.com/anvaka/isect/blob/main/perf/index.js). Higher ops per second is better!
 
 ### K12 graph
 
@@ -235,7 +235,7 @@ are not reported.
 
 # Miscellaneous 
 
-* The source code for the demo is [available here](https://github.com/anvaka/isect/tree/master/demo/interactive).
+* The source code for the demo is [available here](https://github.com/anvaka/isect/tree/main/demo/interactive).
 * The sweep line algorithm requires a binary search tree. I'm using [w8r/splay-tree](https://github.com/w8r/splay-tree) for this purpose. Love the library a lot!
 I have also tried AVL tree, but found their performance worse than splay tree.
 * If you need a sweep line with higher precision, consider porting this library to
