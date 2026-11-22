@@ -252,3 +252,5 @@ MIT
 
 I hope you enjoy the library. Feel free to ping me (anvaka@gmail.com or https://twitter.com/anvaka) if
 you have any feedback.
+
+See my other projects at [anvaka.com](https://anvaka.com).
